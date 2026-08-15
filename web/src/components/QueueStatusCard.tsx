@@ -57,7 +57,7 @@ export default function QueueStatusCard({
                 }`}
               >
                 {i < stepIndex ? (
-                  <CheckCircle2 className="h-4.5 w-4.5" />
+                  <CheckCircle2 className="h-4 w-4" />
                 ) : (
                   <Hourglass className="h-4 w-4" />
                 )}

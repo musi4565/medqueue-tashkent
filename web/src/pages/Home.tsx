@@ -53,7 +53,7 @@ export default function Home() {
             className="flex flex-col gap-3 rounded-xl2 bg-white p-6 shadow-card"
           >
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <f.icon className="h-5.5 w-5.5" />
+              <f.icon className="h-5 w-5" />
             </span>
             <p className="font-semibold text-ink">{f.title}</p>
             <p className="text-sm text-ink/55">{f.description}</p>

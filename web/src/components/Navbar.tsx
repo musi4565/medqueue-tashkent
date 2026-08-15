@@ -21,7 +21,7 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <NavLink to="/" className="flex items-center gap-2 font-extrabold text-ink">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white">
-            <Activity className="h-4.5 w-4.5" />
+            <Activity className="h-4 w-4" />
           </span>
           <span className="hidden sm:inline">MedQueue Tashkent</span>
         </NavLink>

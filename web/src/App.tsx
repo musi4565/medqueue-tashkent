@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { RefreshCw } from "lucide-react";
 import Navbar from "./components/Navbar";
 import { LoadingState } from "./components/StateMessage";
 import { useAuth } from "./context/AuthContext";
@@ -11,12 +12,27 @@ import LabResults from "./pages/LabResults";
 import Profile from "./pages/Profile";
 
 export default function App() {
-  const { ready } = useAuth();
+  const { ready, user, bootError, retry } = useAuth();
 
   if (!ready) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface">
-        <LoadingState label="MedQueue Tashkent yuklanmoqda..." />
+        <LoadingState label="Serverga ulanmoqda... (bepul server uyg'onishi biroz vaqt olishi mumkin)" />
+      </div>
+    );
+  }
+
+  if (bootError && !user) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-surface px-4 text-center">
+        <p className="font-semibold text-ink">{bootError}</p>
+        <button
+          onClick={retry}
+          className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Qayta urinish
+        </button>
       </div>
     );
   }
