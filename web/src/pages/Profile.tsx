@@ -6,7 +6,7 @@ import { Appointment } from "../types";
 import { LoadingState, EmptyState, ErrorState } from "../components/StateMessage";
 
 const STATUS_LABEL: Record<string, string> = {
-  BOOKED: "Band qilingan",
+  BOOKED: "Kutishmoqda",
   DONE: "Yakunlangan",
   CANCELLED: "Bekor qilingan",
 };

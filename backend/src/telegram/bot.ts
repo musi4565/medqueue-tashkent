@@ -659,7 +659,7 @@ function registerProfile(bot: Telegraf) {
         return;
       }
       const STATUS_LABEL: Record<string, string> = {
-        BOOKED: "Band qilingan",
+        BOOKED: "Kutishmoqda",
         DONE: "Yakunlangan",
         CANCELLED: "Bekor qilingan",
       };

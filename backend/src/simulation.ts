@@ -7,10 +7,15 @@ const TICK_MS = 7000;
 const LAB_TICK_MS = 25000;
 
 async function tickQueues() {
+  const today = new Date().toISOString().slice(0, 10);
+
+  // only appointments scheduled for today (or earlier) should move through
+  // the queue — a booking made for a future date must stay put until that
+  // day actually arrives, instead of racing to "done" within seconds
   const activeQueues = await prisma.queue.findMany({
     where: {
       status: { in: ["WAITING", "APPROACHING"] },
-      appointment: { status: { not: "CANCELLED" } },
+      appointment: { status: { not: "CANCELLED" }, date: { lte: today } },
     },
     include: { appointment: true },
   });
