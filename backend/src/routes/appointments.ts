@@ -2,6 +2,7 @@ import { Router } from "express";
 import { prisma } from "../lib/prisma";
 import { requireAuth, AuthRequest } from "../middleware/auth";
 import { estimateWaitMinutes } from "../lib/queue";
+import { notifyUser } from "../lib/notify";
 
 const router = Router();
 
@@ -28,7 +29,7 @@ router.post("/", async (req: AuthRequest, res) => {
   const activeQueues = await prisma.queue.count({
     where: {
       status: { in: ["WAITING", "APPROACHING"] },
-      appointment: { doctorId },
+      appointment: { doctorId, status: { not: "CANCELLED" } },
     },
   });
   const totalForDoctor = await prisma.appointment.count({ where: { doctorId } });
@@ -57,7 +58,46 @@ router.post("/", async (req: AuthRequest, res) => {
     include: { doctor: true, clinic: true, queue: true },
   });
 
+  await notifyUser(
+    req.userId!,
+    `Navbatingiz muvaffaqiyatli olindi! Navbat №${queueNumber}, oldinda ${peopleAhead} kishi, taxminiy kutish: ${estimatedWaitMinutes} daqiqa.`,
+    "BOOKING_CONFIRMED"
+  );
+
   res.status(201).json(appointment);
+});
+
+router.patch("/:id/cancel", async (req: AuthRequest, res) => {
+  const appointment = await prisma.appointment.findUnique({
+    where: { id: req.params.id },
+    include: { queue: true },
+  });
+  if (!appointment || appointment.userId !== req.userId) {
+    return res.status(404).json({ error: "Navbat topilmadi" });
+  }
+  if (appointment.status === "CANCELLED") {
+    return res.status(400).json({ error: "Navbat allaqachon bekor qilingan" });
+  }
+  if (appointment.status === "DONE") {
+    return res.status(400).json({ error: "Yakunlangan navbatni bekor qilib bo'lmaydi" });
+  }
+
+  const updated = await prisma.appointment.update({
+    where: { id: appointment.id },
+    data: { status: "CANCELLED" },
+    include: { doctor: true, clinic: true, queue: true },
+  });
+
+  if (appointment.queue) {
+    await prisma.queue.update({
+      where: { id: appointment.queue.id },
+      data: { status: "CANCELLED" },
+    });
+  }
+
+  await notifyUser(req.userId!, "Navbatingiz bekor qilindi.", "BOOKING_CANCELLED");
+
+  res.json(updated);
 });
 
 export default router;

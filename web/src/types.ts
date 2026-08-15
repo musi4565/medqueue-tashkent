@@ -15,7 +15,7 @@ export interface Doctor {
   clinic?: Clinic;
 }
 
-export type QueueStatus = "WAITING" | "APPROACHING" | "CALLED";
+export type QueueStatus = "WAITING" | "APPROACHING" | "CALLED" | "CANCELLED";
 export type AppointmentStatus = "BOOKED" | "DONE" | "CANCELLED";
 
 export interface Queue {

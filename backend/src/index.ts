@@ -6,6 +6,7 @@ import { Server } from "socket.io";
 import { verifyToken } from "./lib/jwt";
 import { setIO } from "./socket";
 import { startSimulation } from "./simulation";
+import { startBot, stopBot } from "./telegram/bot";
 
 import authRoutes from "./routes/auth";
 import doctorsRoutes from "./routes/doctors";
@@ -14,6 +15,7 @@ import appointmentsRoutes from "./routes/appointments";
 import queueRoutes from "./routes/queue";
 import labsRoutes from "./routes/labs";
 import notificationsRoutes from "./routes/notifications";
+import telegramAuthRoutes from "./routes/telegramAuth";
 
 const app = express();
 const server = http.createServer(app);
@@ -32,6 +34,7 @@ app.use("/api/appointments", appointmentsRoutes);
 app.use("/api/queue", queueRoutes);
 app.use("/api/labs", labsRoutes);
 app.use("/api/notifications", notificationsRoutes);
+app.use("/api/telegram", telegramAuthRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: "Topilmadi" }));
 
@@ -56,4 +59,10 @@ const PORT = Number(process.env.PORT) || 4000;
 server.listen(PORT, () => {
   console.log(`MedQueue backend running on port ${PORT}`);
   startSimulation();
+  startBot();
+});
+
+process.on("SIGTERM", () => {
+  stopBot();
+  server.close(() => process.exit(0));
 });

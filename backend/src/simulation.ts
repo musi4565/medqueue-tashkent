@@ -1,13 +1,17 @@
 import { prisma } from "./lib/prisma";
 import { emitToUser } from "./socket";
 import { estimateWaitMinutes } from "./lib/queue";
+import { notifyUser } from "./lib/notify";
 
 const TICK_MS = 7000;
 const LAB_TICK_MS = 25000;
 
 async function tickQueues() {
   const activeQueues = await prisma.queue.findMany({
-    where: { status: { in: ["WAITING", "APPROACHING"] } },
+    where: {
+      status: { in: ["WAITING", "APPROACHING"] },
+      appointment: { status: { not: "CANCELLED" } },
+    },
     include: { appointment: true },
   });
 
@@ -47,25 +51,15 @@ async function tickQueues() {
     });
 
     if (nextStatus === "APPROACHING" && q.status === "WAITING") {
-      const notif = await prisma.notification.create({
-        data: {
-          userId: q.appointment.userId,
-          message: "Navbatingiz yaqinlashmoqda.",
-          type: "QUEUE_APPROACHING",
-        },
-      });
-      emitToUser(q.appointment.userId, "notification:new", notif);
+      await notifyUser(
+        q.appointment.userId,
+        `Navbatingiz yaqinlashmoqda. Oldinda ${updated.peopleAhead} kishi qoldi, taxminiy kutish: ${updated.estimatedWaitMinutes} daqiqa.`,
+        "QUEUE_APPROACHING"
+      );
     }
 
     if (nextStatus === "CALLED" && q.status !== "CALLED") {
-      const notif = await prisma.notification.create({
-        data: {
-          userId: q.appointment.userId,
-          message: "Navbatingiz keldi.",
-          type: "QUEUE_CALLED",
-        },
-      });
-      emitToUser(q.appointment.userId, "notification:new", notif);
+      await notifyUser(q.appointment.userId, "Navbatingiz keldi.", "QUEUE_CALLED");
     }
   }
 }
@@ -80,16 +74,8 @@ async function tickLabs() {
     data: { status: "READY" },
   });
 
-  const notif = await prisma.notification.create({
-    data: {
-      userId: pick.userId,
-      message: "Tahlilingiz tayyor.",
-      type: "LAB_READY",
-    },
-  });
-
   emitToUser(pick.userId, "lab:update", updated);
-  emitToUser(pick.userId, "notification:new", notif);
+  await notifyUser(pick.userId, "Tahlilingiz tayyor.", "LAB_READY");
 }
 
 export function startSimulation() {

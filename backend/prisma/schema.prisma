@@ -14,10 +14,22 @@ model User {
   email         String         @unique
   password      String
   role          String         @default("patient")
+  telegramId    String?        @unique
+  telegramUsername String?
   createdAt     DateTime       @default(now())
   appointments  Appointment[]
   labTests      LabTest[]
   notifications Notification[]
+  linkCodes     TelegramLinkCode[]
+}
+
+model TelegramLinkCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model Clinic {

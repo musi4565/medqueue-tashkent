@@ -1,4 +1,4 @@
-import { Hourglass, Users, Timer, CheckCircle2 } from "lucide-react";
+import { Hourglass, Users, Timer, CheckCircle2, XCircle } from "lucide-react";
 import { Queue } from "../types";
 
 const STEPS = [
@@ -17,6 +17,24 @@ export default function QueueStatusCard({
   clinicName?: string;
 }) {
   const stepIndex = STEPS.findIndex((s) => s.key === queue.status);
+
+  if (queue.status === "CANCELLED") {
+    return (
+      <div className="rounded-xl2 bg-white p-6 shadow-soft sm:p-8">
+        {(doctorName || clinicName) && (
+          <p className="mb-4 text-sm text-ink/50">
+            {doctorName}
+            {doctorName && clinicName ? " · " : ""}
+            {clinicName}
+          </p>
+        )}
+        <div className="flex flex-col items-center gap-2 rounded-xl2 bg-red-50 p-8 text-center text-red-600">
+          <XCircle className="h-8 w-8" />
+          <p className="font-semibold">Navbat №{queue.queueNumber} bekor qilingan</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl2 bg-white p-6 shadow-soft sm:p-8">
