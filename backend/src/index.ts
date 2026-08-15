@@ -24,9 +24,6 @@ app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
-app.get("/api/debug-cors", (_req, res) =>
-  res.json({ FRONTEND_URL: process.env.FRONTEND_URL, allowedOrigins })
-);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/doctors", doctorsRoutes);
