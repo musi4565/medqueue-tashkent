@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  phone         String
+  email         String         @unique
+  password      String
+  role          String         @default("patient")
+  createdAt     DateTime       @default(now())
+  appointments  Appointment[]
+  labTests      LabTest[]
+  notifications Notification[]
+}
+
+model Clinic {
+  id           String        @id @default(cuid())
+  name         String
+  address      String
+  workingHours String
+  doctors      Doctor[]
+  appointments Appointment[]
+}
+
+model Doctor {
+  id           String        @id @default(cuid())
+  name         String
+  specialty    String
+  photoUrl     String
+  clinicId     String
+  clinic       Clinic        @relation(fields: [clinicId], references: [id])
+  appointments Appointment[]
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  doctorId    String
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  clinicId    String
+  clinic      Clinic   @relation(fields: [clinicId], references: [id])
+  date        String
+  time        String
+  status      String   @default("BOOKED")
+  createdAt   DateTime @default(now())
+  queue       Queue?
+}
+
+model Queue {
+  id                   String      @id @default(cuid())
+  appointmentId        String      @unique
+  appointment          Appointment @relation(fields: [appointmentId], references: [id])
+  queueNumber          Int
+  peopleAhead          Int
+  estimatedWaitMinutes Int
+  status               String      @default("WAITING")
+  updatedAt            DateTime    @updatedAt
+}
+
+model LabTest {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  name         String
+  date         String
+  status       String   @default("PENDING")
+  result       String?
+  normalRange  String?
+  createdAt    DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  message   String
+  type      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
